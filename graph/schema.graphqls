@@ -1,0 +1,23 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Chapter {
+  id: ID
+  name: String
+  pages: String
+  mangaId: ID
+}
+
+type Manga {
+  id: ID
+  name: String
+  thumbnail: String
+  description: String
+  chapters: [Chapter]
+}
+
+type Query {
+  getMangaList: [Manga]
+  getMangaDetails(mangaId: ID!): Manga
+}
