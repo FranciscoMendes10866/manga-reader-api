@@ -2,17 +2,35 @@
 
 package model
 
-type Chapter struct {
-	ID      *string `json:"id"`
-	Name    *string `json:"name"`
-	Pages   *string `json:"pages"`
-	MangaID *string `json:"mangaId"`
+type Categories struct {
+	ID   *string `json:"ID"`
+	Name *string `json:"name"`
 }
 
-type Manga struct {
-	ID          *string    `json:"id"`
-	Name        *string    `json:"name"`
-	Thumbnail   *string    `json:"thumbnail"`
-	Description *string    `json:"description"`
-	Chapters    []*Chapter `json:"chapters"`
+type Chapters struct {
+	ID      *string `json:"ID"`
+	Name    *string `json:"name"`
+	MangaID *string `json:"manga_id"`
+}
+
+type GetAllMangasResponse struct {
+	CreatedAt   *string `json:"CreatedAt"`
+	UpdatedAt   *string `json:"UpdatedAt"`
+	DeletedAt   *string `json:"DeletedAt"`
+	ID          *string `json:"ID"`
+	Name        *string `json:"name"`
+	Thumbnail   *string `json:"thumbnail"`
+	Description *string `json:"description"`
+}
+
+type GetMangaDetailsResponse struct {
+	CreatedAt   *string       `json:"CreatedAt"`
+	UpdatedAt   *string       `json:"UpdatedAt"`
+	DeletedAt   *string       `json:"DeletedAt"`
+	ID          *string       `json:"ID"`
+	Name        *string       `json:"name"`
+	Thumbnail   *string       `json:"thumbnail"`
+	Description *string       `json:"description"`
+	Chapters    []*Chapters   `json:"chapters"`
+	Categories  []*Categories `json:"categories"`
 }

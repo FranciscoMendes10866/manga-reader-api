@@ -5,25 +5,33 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/FranciscoMendes10866/gql-api/graph/config"
 	"github.com/FranciscoMendes10866/gql-api/graph/generated"
 	"github.com/FranciscoMendes10866/gql-api/graph/model"
+	resty "github.com/go-resty/resty/v2"
 )
 
-func (r *queryResolver) GetMangaList(ctx context.Context) ([]*model.Manga, error) {
-	var mangas []*model.Manga
-	config.Database.Table("manga_entities").Find(&mangas)
-	return mangas, nil
+func (r *queryResolver) GetAllMangas(ctx context.Context) ([]*model.GetAllMangasResponse, error) {
+	var result []*model.GetAllMangasResponse
+	client := resty.New()
+	_, err := client.R().SetHeader("x-dango-manga-key", "superSecretKey").SetResult(&result).Get("http://localhost:3333/api/manga/get-all")
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(result)
+	return result, nil
 }
 
-func (r *queryResolver) GetMangaDetails(ctx context.Context, mangaID string) (*model.Manga, error) {
-	var manga *model.Manga
-	var chapters []*model.Chapter
-	config.Database.Table("manga_entities").Where("id = ?", mangaID).First(&manga)
-	config.Database.Table("chapter_entities").Where("manga_id = ?", mangaID).Find(&chapters)
-	manga.Chapters = chapters
-	return manga, nil
+func (r *queryResolver) GetMangaDetails(ctx context.Context, mangaID string) (*model.GetMangaDetailsResponse, error) {
+	var result *model.GetMangaDetailsResponse
+	client := resty.New()
+	_, err := client.R().SetHeader("x-dango-manga-key", "superSecretKey").SetPathParams(map[string]string{"mangaId": mangaID}).SetResult(&result).Get("http://localhost:3333/api/manga/get-details/{mangaId}")
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Query returns generated.QueryResolver implementation.

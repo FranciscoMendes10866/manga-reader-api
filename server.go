@@ -9,7 +9,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/FranciscoMendes10866/gql-api/graph"
-	"github.com/FranciscoMendes10866/gql-api/graph/config"
 	"github.com/FranciscoMendes10866/gql-api/graph/generated"
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/websocket"
@@ -32,8 +31,6 @@ func main() {
 		AllowCredentials: true,
 		Debug:            true,
 	}).Handler)
-
-	config.Connect()
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	srv.AddTransport(&transport.Websocket{

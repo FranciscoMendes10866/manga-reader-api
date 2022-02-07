@@ -2,22 +2,40 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Chapter {
-  id: ID
-  name: String
-  pages: String
-  mangaId: ID
+type Chapters {
+  ID: String
+	name: String
+	manga_id: String
 }
 
-type Manga {
-  id: ID
+type Categories {
+  ID: String
+	name: String
+}
+
+type GetMangaDetailsResponse {
+  CreatedAt: String
+  UpdatedAt: String
+  DeletedAt: String
+  ID: String
   name: String
   thumbnail: String
   description: String
-  chapters: [Chapter]
+  chapters: [Chapters]
+  categories: [Categories]
+}
+
+type GetAllMangasResponse {
+  CreatedAt: String
+  UpdatedAt: String
+  DeletedAt: String
+  ID: String
+  name: String
+  thumbnail: String
+  description: String
 }
 
 type Query {
-  getMangaList: [Manga]
-  getMangaDetails(mangaId: ID!): Manga
+  getAllMangas: [GetAllMangasResponse]
+  getMangaDetails(mangaId: ID!): GetMangaDetailsResponse
 }
