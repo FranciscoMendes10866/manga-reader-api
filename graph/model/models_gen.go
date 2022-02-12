@@ -14,16 +14,6 @@ type Chapters struct {
 }
 
 type GetAllMangasResponse struct {
-	CreatedAt   *string `json:"CreatedAt"`
-	UpdatedAt   *string `json:"UpdatedAt"`
-	DeletedAt   *string `json:"DeletedAt"`
-	ID          *string `json:"ID"`
-	Name        *string `json:"name"`
-	Thumbnail   *string `json:"thumbnail"`
-	Description *string `json:"description"`
-}
-
-type GetMangaDetailsResponse struct {
 	CreatedAt   *string       `json:"CreatedAt"`
 	UpdatedAt   *string       `json:"UpdatedAt"`
 	DeletedAt   *string       `json:"DeletedAt"`
@@ -31,6 +21,32 @@ type GetMangaDetailsResponse struct {
 	Name        *string       `json:"name"`
 	Thumbnail   *string       `json:"thumbnail"`
 	Description *string       `json:"description"`
-	Chapters    []*Chapters   `json:"chapters"`
 	Categories  []*Categories `json:"categories"`
+}
+
+type GetChapterResponse struct {
+	CreatedAt *string  `json:"CreatedAt"`
+	UpdatedAt *string  `json:"UpdatedAt"`
+	DeletedAt *string  `json:"DeletedAt"`
+	ID        *string  `json:"ID"`
+	Name      *string  `json:"name"`
+	MangaID   *string  `json:"manga_id"`
+	Pages     []*Pages `json:"pages"`
+}
+
+type GetMangaDetailsResponse struct {
+	CreatedAt   *string     `json:"CreatedAt"`
+	UpdatedAt   *string     `json:"UpdatedAt"`
+	DeletedAt   *string     `json:"DeletedAt"`
+	ID          *string     `json:"ID"`
+	Name        *string     `json:"name"`
+	Thumbnail   *string     `json:"thumbnail"`
+	Description *string     `json:"description"`
+	Chapters    []*Chapters `json:"chapters"`
+}
+
+type Pages struct {
+	ID        *string `json:"ID"`
+	URL       *string `json:"url"`
+	ChapterID *string `json:"chapter_id"`
 }

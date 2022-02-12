@@ -53,6 +53,7 @@ type ComplexityRoot struct {
 	}
 
 	GetAllMangasResponse struct {
+		Categories  func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
 		DeletedAt   func(childComplexity int) int
 		Description func(childComplexity int) int
@@ -62,8 +63,17 @@ type ComplexityRoot struct {
 		UpdatedAt   func(childComplexity int) int
 	}
 
+	GetChapterResponse struct {
+		CreatedAt func(childComplexity int) int
+		DeletedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		MangaID   func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Pages     func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+	}
+
 	GetMangaDetailsResponse struct {
-		Categories  func(childComplexity int) int
 		Chapters    func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
 		DeletedAt   func(childComplexity int) int
@@ -74,8 +84,15 @@ type ComplexityRoot struct {
 		UpdatedAt   func(childComplexity int) int
 	}
 
+	Pages struct {
+		ChapterID func(childComplexity int) int
+		ID        func(childComplexity int) int
+		URL       func(childComplexity int) int
+	}
+
 	Query struct {
 		GetAllMangas    func(childComplexity int) int
+		GetChapter      func(childComplexity int, chapterID string) int
 		GetMangaDetails func(childComplexity int, mangaID string) int
 	}
 }
@@ -83,6 +100,7 @@ type ComplexityRoot struct {
 type QueryResolver interface {
 	GetAllMangas(ctx context.Context) ([]*model.GetAllMangasResponse, error)
 	GetMangaDetails(ctx context.Context, mangaID string) (*model.GetMangaDetailsResponse, error)
+	GetChapter(ctx context.Context, chapterID string) (*model.GetChapterResponse, error)
 }
 
 type executableSchema struct {
@@ -135,6 +153,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Chapters.Name(childComplexity), true
 
+	case "GetAllMangasResponse.categories":
+		if e.complexity.GetAllMangasResponse.Categories == nil {
+			break
+		}
+
+		return e.complexity.GetAllMangasResponse.Categories(childComplexity), true
+
 	case "GetAllMangasResponse.CreatedAt":
 		if e.complexity.GetAllMangasResponse.CreatedAt == nil {
 			break
@@ -184,12 +209,54 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GetAllMangasResponse.UpdatedAt(childComplexity), true
 
-	case "GetMangaDetailsResponse.categories":
-		if e.complexity.GetMangaDetailsResponse.Categories == nil {
+	case "GetChapterResponse.CreatedAt":
+		if e.complexity.GetChapterResponse.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.GetMangaDetailsResponse.Categories(childComplexity), true
+		return e.complexity.GetChapterResponse.CreatedAt(childComplexity), true
+
+	case "GetChapterResponse.DeletedAt":
+		if e.complexity.GetChapterResponse.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.GetChapterResponse.DeletedAt(childComplexity), true
+
+	case "GetChapterResponse.ID":
+		if e.complexity.GetChapterResponse.ID == nil {
+			break
+		}
+
+		return e.complexity.GetChapterResponse.ID(childComplexity), true
+
+	case "GetChapterResponse.manga_id":
+		if e.complexity.GetChapterResponse.MangaID == nil {
+			break
+		}
+
+		return e.complexity.GetChapterResponse.MangaID(childComplexity), true
+
+	case "GetChapterResponse.name":
+		if e.complexity.GetChapterResponse.Name == nil {
+			break
+		}
+
+		return e.complexity.GetChapterResponse.Name(childComplexity), true
+
+	case "GetChapterResponse.pages":
+		if e.complexity.GetChapterResponse.Pages == nil {
+			break
+		}
+
+		return e.complexity.GetChapterResponse.Pages(childComplexity), true
+
+	case "GetChapterResponse.UpdatedAt":
+		if e.complexity.GetChapterResponse.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.GetChapterResponse.UpdatedAt(childComplexity), true
 
 	case "GetMangaDetailsResponse.chapters":
 		if e.complexity.GetMangaDetailsResponse.Chapters == nil {
@@ -247,12 +314,45 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GetMangaDetailsResponse.UpdatedAt(childComplexity), true
 
+	case "Pages.chapter_id":
+		if e.complexity.Pages.ChapterID == nil {
+			break
+		}
+
+		return e.complexity.Pages.ChapterID(childComplexity), true
+
+	case "Pages.ID":
+		if e.complexity.Pages.ID == nil {
+			break
+		}
+
+		return e.complexity.Pages.ID(childComplexity), true
+
+	case "Pages.url":
+		if e.complexity.Pages.URL == nil {
+			break
+		}
+
+		return e.complexity.Pages.URL(childComplexity), true
+
 	case "Query.getAllMangas":
 		if e.complexity.Query.GetAllMangas == nil {
 			break
 		}
 
 		return e.complexity.Query.GetAllMangas(childComplexity), true
+
+	case "Query.getChapter":
+		if e.complexity.Query.GetChapter == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getChapter_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetChapter(childComplexity, args["chapterId"].(string)), true
 
 	case "Query.getMangaDetails":
 		if e.complexity.Query.GetMangaDetails == nil {
@@ -331,6 +431,12 @@ type Categories {
 	name: String
 }
 
+type Pages {
+  ID: String
+	url: String
+	chapter_id: String
+}
+
 type GetMangaDetailsResponse {
   CreatedAt: String
   UpdatedAt: String
@@ -340,7 +446,6 @@ type GetMangaDetailsResponse {
   thumbnail: String
   description: String
   chapters: [Chapters]
-  categories: [Categories]
 }
 
 type GetAllMangasResponse {
@@ -351,11 +456,23 @@ type GetAllMangasResponse {
   name: String
   thumbnail: String
   description: String
+  categories: [Categories]
+}
+
+type GetChapterResponse {
+  CreatedAt: String
+  UpdatedAt: String
+  DeletedAt: String
+  ID: String
+  name: String
+  manga_id: String
+  pages: [Pages]
 }
 
 type Query {
   getAllMangas: [GetAllMangasResponse]
   getMangaDetails(mangaId: ID!): GetMangaDetailsResponse
+  getChapter(chapterId: ID!): GetChapterResponse
 }
 `, BuiltIn: false},
 }
@@ -377,6 +494,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getChapter_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["chapterId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chapterId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["chapterId"] = arg0
 	return args, nil
 }
 
@@ -817,6 +949,262 @@ func (ec *executionContext) _GetAllMangasResponse_description(ctx context.Contex
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _GetAllMangasResponse_categories(ctx context.Context, field graphql.CollectedField, obj *model.GetAllMangasResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetAllMangasResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Categories, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Categories)
+	fc.Result = res
+	return ec.marshalOCategories2ᚕᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐCategories(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetChapterResponse_CreatedAt(ctx context.Context, field graphql.CollectedField, obj *model.GetChapterResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetChapterResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetChapterResponse_UpdatedAt(ctx context.Context, field graphql.CollectedField, obj *model.GetChapterResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetChapterResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetChapterResponse_DeletedAt(ctx context.Context, field graphql.CollectedField, obj *model.GetChapterResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetChapterResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetChapterResponse_ID(ctx context.Context, field graphql.CollectedField, obj *model.GetChapterResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetChapterResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetChapterResponse_name(ctx context.Context, field graphql.CollectedField, obj *model.GetChapterResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetChapterResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetChapterResponse_manga_id(ctx context.Context, field graphql.CollectedField, obj *model.GetChapterResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetChapterResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MangaID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetChapterResponse_pages(ctx context.Context, field graphql.CollectedField, obj *model.GetChapterResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetChapterResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Pages)
+	fc.Result = res
+	return ec.marshalOPages2ᚕᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐPages(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _GetMangaDetailsResponse_CreatedAt(ctx context.Context, field graphql.CollectedField, obj *model.GetMangaDetailsResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1073,7 +1461,7 @@ func (ec *executionContext) _GetMangaDetailsResponse_chapters(ctx context.Contex
 	return ec.marshalOChapters2ᚕᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐChapters(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _GetMangaDetailsResponse_categories(ctx context.Context, field graphql.CollectedField, obj *model.GetMangaDetailsResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _Pages_ID(ctx context.Context, field graphql.CollectedField, obj *model.Pages) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1081,7 +1469,7 @@ func (ec *executionContext) _GetMangaDetailsResponse_categories(ctx context.Cont
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "GetMangaDetailsResponse",
+		Object:     "Pages",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1091,7 +1479,7 @@ func (ec *executionContext) _GetMangaDetailsResponse_categories(ctx context.Cont
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Categories, nil
+		return obj.ID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1100,9 +1488,73 @@ func (ec *executionContext) _GetMangaDetailsResponse_categories(ctx context.Cont
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Categories)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOCategories2ᚕᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐCategories(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pages_url(ctx context.Context, field graphql.CollectedField, obj *model.Pages) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pages",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pages_chapter_id(ctx context.Context, field graphql.CollectedField, obj *model.Pages) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pages",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ChapterID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getAllMangas(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1174,6 +1626,45 @@ func (ec *executionContext) _Query_getMangaDetails(ctx context.Context, field gr
 	res := resTmp.(*model.GetMangaDetailsResponse)
 	fc.Result = res
 	return ec.marshalOGetMangaDetailsResponse2ᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐGetMangaDetailsResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getChapter(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getChapter_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetChapter(rctx, args["chapterId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.GetChapterResponse)
+	fc.Result = res
+	return ec.marshalOGetChapterResponse2ᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐGetChapterResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2456,6 +2947,44 @@ func (ec *executionContext) _GetAllMangasResponse(ctx context.Context, sel ast.S
 			out.Values[i] = ec._GetAllMangasResponse_thumbnail(ctx, field, obj)
 		case "description":
 			out.Values[i] = ec._GetAllMangasResponse_description(ctx, field, obj)
+		case "categories":
+			out.Values[i] = ec._GetAllMangasResponse_categories(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var getChapterResponseImplementors = []string{"GetChapterResponse"}
+
+func (ec *executionContext) _GetChapterResponse(ctx context.Context, sel ast.SelectionSet, obj *model.GetChapterResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getChapterResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetChapterResponse")
+		case "CreatedAt":
+			out.Values[i] = ec._GetChapterResponse_CreatedAt(ctx, field, obj)
+		case "UpdatedAt":
+			out.Values[i] = ec._GetChapterResponse_UpdatedAt(ctx, field, obj)
+		case "DeletedAt":
+			out.Values[i] = ec._GetChapterResponse_DeletedAt(ctx, field, obj)
+		case "ID":
+			out.Values[i] = ec._GetChapterResponse_ID(ctx, field, obj)
+		case "name":
+			out.Values[i] = ec._GetChapterResponse_name(ctx, field, obj)
+		case "manga_id":
+			out.Values[i] = ec._GetChapterResponse_manga_id(ctx, field, obj)
+		case "pages":
+			out.Values[i] = ec._GetChapterResponse_pages(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2494,8 +3023,34 @@ func (ec *executionContext) _GetMangaDetailsResponse(ctx context.Context, sel as
 			out.Values[i] = ec._GetMangaDetailsResponse_description(ctx, field, obj)
 		case "chapters":
 			out.Values[i] = ec._GetMangaDetailsResponse_chapters(ctx, field, obj)
-		case "categories":
-			out.Values[i] = ec._GetMangaDetailsResponse_categories(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var pagesImplementors = []string{"Pages"}
+
+func (ec *executionContext) _Pages(ctx context.Context, sel ast.SelectionSet, obj *model.Pages) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pagesImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Pages")
+		case "ID":
+			out.Values[i] = ec._Pages_ID(ctx, field, obj)
+		case "url":
+			out.Values[i] = ec._Pages_url(ctx, field, obj)
+		case "chapter_id":
+			out.Values[i] = ec._Pages_chapter_id(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2542,6 +3097,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getMangaDetails(ctx, field)
+				return res
+			})
+		case "getChapter":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getChapter(ctx, field)
 				return res
 			})
 		case "__type":
@@ -3279,11 +3845,66 @@ func (ec *executionContext) marshalOGetAllMangasResponse2ᚖgithubᚗcomᚋFranc
 	return ec._GetAllMangasResponse(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOGetChapterResponse2ᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐGetChapterResponse(ctx context.Context, sel ast.SelectionSet, v *model.GetChapterResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._GetChapterResponse(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOGetMangaDetailsResponse2ᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐGetMangaDetailsResponse(ctx context.Context, sel ast.SelectionSet, v *model.GetMangaDetailsResponse) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._GetMangaDetailsResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPages2ᚕᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐPages(ctx context.Context, sel ast.SelectionSet, v []*model.Pages) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPages2ᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐPages(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOPages2ᚖgithubᚗcomᚋFranciscoMendes10866ᚋgqlᚑapiᚋgraphᚋmodelᚐPages(ctx context.Context, sel ast.SelectionSet, v *model.Pages) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Pages(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

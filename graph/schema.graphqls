@@ -13,6 +13,12 @@ type Categories {
 	name: String
 }
 
+type Pages {
+  ID: String
+	url: String
+	chapter_id: String
+}
+
 type GetMangaDetailsResponse {
   CreatedAt: String
   UpdatedAt: String
@@ -22,7 +28,6 @@ type GetMangaDetailsResponse {
   thumbnail: String
   description: String
   chapters: [Chapters]
-  categories: [Categories]
 }
 
 type GetAllMangasResponse {
@@ -33,9 +38,21 @@ type GetAllMangasResponse {
   name: String
   thumbnail: String
   description: String
+  categories: [Categories]
+}
+
+type GetChapterResponse {
+  CreatedAt: String
+  UpdatedAt: String
+  DeletedAt: String
+  ID: String
+  name: String
+  manga_id: String
+  pages: [Pages]
 }
 
 type Query {
   getAllMangas: [GetAllMangasResponse]
   getMangaDetails(mangaId: ID!): GetMangaDetailsResponse
+  getChapter(chapterId: ID!): GetChapterResponse
 }
