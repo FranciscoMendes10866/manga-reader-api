@@ -15,13 +15,13 @@ import (
 )
 
 func (r *queryResolver) GetAllMangas(ctx context.Context) ([]*model.GetAllMangasResponse, error) {
-	val, notFound := helpers.MemcachedClient.Get("mangas-all")
+	cacheKey := "mangas-all"
+	cacheItem, notFound := helpers.GetFromCache(cacheKey)
 
 	if notFound == nil {
 		list := []*model.GetAllMangasResponse{}
-		buffer := val.Value
-		json.Unmarshal(buffer, &list)
-		fmt.Println("[%a] Get from cache", "mangas-all")
+		json.Unmarshal(cacheItem, &list)
+		fmt.Println("[%a] Get from cache", cacheKey)
 		return list, nil
 	}
 
@@ -33,18 +33,17 @@ func (r *queryResolver) GetAllMangas(ctx context.Context) ([]*model.GetAllMangas
 	}
 
 	buffer, _ := json.Marshal(result)
-	helpers.SaveToCache("mangas-all", buffer)
+	helpers.SaveToCache(cacheKey, buffer, helpers.FifteenMinutesCacheExpiration)
 
 	return result, nil
 }
 
 func (r *queryResolver) GetMangaDetails(ctx context.Context, mangaID string) (*model.GetMangaDetailsResponse, error) {
-	val, notFound := helpers.MemcachedClient.Get(mangaID)
+	cacheItem, notFound := helpers.GetFromCache(mangaID)
 
 	if notFound == nil {
 		saved := &model.GetMangaDetailsResponse{}
-		buffer := val.Value
-		json.Unmarshal(buffer, &saved)
+		json.Unmarshal(cacheItem, &saved)
 		fmt.Println("[%a] Get Manga from cache", mangaID)
 		return saved, nil
 	}
@@ -57,18 +56,17 @@ func (r *queryResolver) GetMangaDetails(ctx context.Context, mangaID string) (*m
 	}
 
 	buffer, _ := json.Marshal(result)
-	helpers.SaveToCache(mangaID, buffer)
+	helpers.SaveToCache(mangaID, buffer, helpers.FifteenMinutesCacheExpiration)
 
 	return result, nil
 }
 
 func (r *queryResolver) GetChapter(ctx context.Context, chapterID string) (*model.GetChapterResponse, error) {
-	val, notFound := helpers.MemcachedClient.Get(chapterID)
+	cacheItem, notFound := helpers.GetFromCache(chapterID)
 
 	if notFound == nil {
 		saved := &model.GetChapterResponse{}
-		buffer := val.Value
-		json.Unmarshal(buffer, &saved)
+		json.Unmarshal(cacheItem, &saved)
 		fmt.Println("[%a] Get Chapter from cache", chapterID)
 		return saved, nil
 	}
@@ -81,7 +79,31 @@ func (r *queryResolver) GetChapter(ctx context.Context, chapterID string) (*mode
 	}
 
 	buffer, _ := json.Marshal(result)
-	helpers.SaveToCache(chapterID, buffer)
+	helpers.SaveToCache(chapterID, buffer, helpers.FifteenMinutesCacheExpiration)
+
+	return result, nil
+}
+
+func (r *queryResolver) GetLatestMangaUpdates(ctx context.Context) ([]*model.GetMangaDetailsResponse, error) {
+	cacheKey := "latest-manga-updates"
+	cacheItem, notFound := helpers.GetFromCache(cacheKey)
+
+	if notFound == nil {
+		list := []*model.GetMangaDetailsResponse{}
+		json.Unmarshal(cacheItem, &list)
+		fmt.Println("[%a] Get from cache", cacheKey)
+		return list, nil
+	}
+
+	var result []*model.GetMangaDetailsResponse
+	client := resty.New()
+	_, err := client.R().SetHeader("x-dango-manga-key", "superSecretKey").SetResult(&result).Get("http://localhost:3333/api/manga/latest")
+	if err != nil {
+		return nil, err
+	}
+
+	buffer, _ := json.Marshal(result)
+	helpers.SaveToCache(cacheKey, buffer, helpers.TwoHoursCacheExpiration)
 
 	return result, nil
 }

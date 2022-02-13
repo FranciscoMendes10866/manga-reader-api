@@ -3,17 +3,26 @@
 # https://gqlgen.com/getting-started/
 
 type Chapters {
+  CreatedAt: String
+  UpdatedAt: String
+  DeletedAt: String
   ID: String
 	name: String
 	manga_id: String
 }
 
 type Categories {
+  CreatedAt: String
+  UpdatedAt: String
+  DeletedAt: String
   ID: String
 	name: String
 }
 
 type Pages {
+  CreatedAt: String
+  UpdatedAt: String
+  DeletedAt: String
   ID: String
 	url: String
 	chapter_id: String
@@ -55,4 +64,5 @@ type Query {
   getAllMangas: [GetAllMangasResponse]
   getMangaDetails(mangaId: ID!): GetMangaDetailsResponse
   getChapter(chapterId: ID!): GetChapterResponse
+  getLatestMangaUpdates: [GetMangaDetailsResponse]
 }

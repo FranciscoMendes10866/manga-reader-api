@@ -3,14 +3,20 @@
 package model
 
 type Categories struct {
-	ID   *string `json:"ID"`
-	Name *string `json:"name"`
+	CreatedAt *string `json:"CreatedAt"`
+	UpdatedAt *string `json:"UpdatedAt"`
+	DeletedAt *string `json:"DeletedAt"`
+	ID        *string `json:"ID"`
+	Name      *string `json:"name"`
 }
 
 type Chapters struct {
-	ID      *string `json:"ID"`
-	Name    *string `json:"name"`
-	MangaID *string `json:"manga_id"`
+	CreatedAt *string `json:"CreatedAt"`
+	UpdatedAt *string `json:"UpdatedAt"`
+	DeletedAt *string `json:"DeletedAt"`
+	ID        *string `json:"ID"`
+	Name      *string `json:"name"`
+	MangaID   *string `json:"manga_id"`
 }
 
 type GetAllMangasResponse struct {
@@ -46,6 +52,9 @@ type GetMangaDetailsResponse struct {
 }
 
 type Pages struct {
+	CreatedAt *string `json:"CreatedAt"`
+	UpdatedAt *string `json:"UpdatedAt"`
+	DeletedAt *string `json:"DeletedAt"`
 	ID        *string `json:"ID"`
 	URL       *string `json:"url"`
 	ChapterID *string `json:"chapter_id"`
